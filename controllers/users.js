@@ -44,10 +44,7 @@ module.exports.login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch(() => {
-      throw new AuthError('Неправильные почта или пароль');
-    })
-    .catch(next);
+    .catch(() => next(new AuthError('Авторизация не пройдена')));
 };
 
 module.exports.getUserInfo = (req, res, next) => {

@@ -7,7 +7,7 @@ const ForbiddenError = require('../errors/forbidden-err'); // 403
 module.exports.getMovies = (req, res, next) => {
   Movie.find({})
     .then((films) => res.send({ data: films }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.addMovie = (req, res, next) => {
@@ -49,16 +49,8 @@ module.exports.deleteMovie = (req, res, next) => {
       if (movie.owner._id.toString() !== req.user._id) {
         throw new ForbiddenError('Попытка удалить чужой фильм');
       }
-      return Movie.findByIdAndRemove(req.params.movieId)
-        .then((data) => {
-          res.send({ data });
-        })
-        .catch((err) => {
-          if (err.name === 'CastError') {
-            throw new BadRequestError('Переданы некорректные данные фильма');
-          }
-          throw new Error();
-        })
+      movie.remove()
+        .then(() => res.send({ data: movie }))
         .catch(next);
     })
     .catch((err) => {

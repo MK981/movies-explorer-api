@@ -2,6 +2,7 @@ const Movie = require('../models/movie');
 
 const NotFoundError = require('../errors/not-found-err'); // 404
 const BadRequestError = require('../errors/bad-request-err'); // 400
+const ForbiddenError = require('../errors/forbidden-err'); // 403
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({})
@@ -45,17 +46,26 @@ module.exports.deleteMovie = (req, res, next) => {
       if (!movie) {
         throw new NotFoundError('Фильм с указанным _id не найден');
       }
+      if (movie.owner._id.toString() !== req.user._id) {
+        throw new ForbiddenError('Попытка удалить чужой фильм');
+      }
       return Movie.findByIdAndRemove(req.params.movieId)
         .then((data) => {
           res.send({ data });
         })
         .catch((err) => {
           if (err.name === 'CastError') {
-            throw new BadRequestError('Переданы некорректные данные карточки');
+            throw new BadRequestError('Переданы некорректные данные фильма');
           }
           throw new Error();
         })
         .catch(next);
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Переданы некорректные данные фильма');
+      }
+      throw new Error();
+    })
+    .catch(next);
 };

@@ -10,7 +10,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./middlewares/limiter');
 const errorHandler = require('./middlewares/error-handler');
 
-const { PORT = 3000, NODE_ENV, DB_NAME } = process.env;
+const { PORT = 3000, NODE_ENV, DATA_BASE } = process.env;
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // mongoose.connect('mongodb://localhost:27017/moviesdb');
-mongoose.connect(`mongodb://localhost:27017/${NODE_ENV === 'production' ? DB_NAME : 'moviesdb'}`);
+mongoose.connect(NODE_ENV === 'production' ? DATA_BASE : 'mongodb://localhost:27017/moviesdb');
 
 app.use(requestLogger);
 
